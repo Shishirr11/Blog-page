@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css"
+        integrity="sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ" crossorigin="anonymous">
+    <title>Tech Tides — Post</title>
+</head>
+
+<body>
+
+    <header>
+        <div class="header-menu-position">
+            <nav class="left-menu">
+                <a href="index.html">Home</a>
+                <a href="index.html#categories-section">Categories</a>
+                <a href="index.html#about-section">About</a>
+            </nav>
+            <nav class="left-menu-hamburger">
+                <a href="#" id="hamburger-btn">☰</a>
+            </nav>
+            <div class="right-menu">
+            <a href="https://www.linkedin.com/in/shishir-kumar-vallapuneni/"><i class="fab fa-linkedin"></i></a>
+            <a href="https://github.com/Shishirr11/"><i class="fab fa-github"></i></a>
+            </div>
+        </div>
+        <nav class="mobile-nav" id="mobile-nav">
+            <a href="index.html">Home</a>
+            <a href="index.html#categories-section">Categories</a>
+            <a href="index.html#about-section">About</a>
+        </nav>
+    </header>
+    <hr />
+
+    <main>
+        <div class="main-title">
+            <h1>Tech Tides</h1>
+            <h2>Surfing the wave of innovation</h2>
+        </div>
+
+        <div class="article-aside-flex" style="margin-top:30px;">
+
+            <!-- FULL ARTICLE -->
+            <div class="article-column">
+                <article id="full-post">
+                    <!-- Populated by JS -->
+                </article>
+            </div>
+
+            <!-- SIDEBAR -->
+            <aside>
+                <div class="about-aside" id="about-section">
+                    <h2>About Me</h2>
+                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&auto=format&fit=crop"
+                        alt="author photo">
+                    <p>
+                        Tech writer covering the ideas reshaping how we perceive 
+                        and build the future. Always curious, never brief.
+                    </p>
+                </div>
+                <hr />
+
+                <div class="aside-links">
+                    <h2>Follow</h2>
+                    <div>
+                        <a href="https://www.linkedin.com/in/shishir-kumar-vallapuneni/"><i class="fab fa-linkedin"></i></a>
+                        <a href="https://github.com/Shishirr11/"><i class="fab fa-github"></i></a>
+                    </div>
+                </div>
+                <hr />
+
+                <div class="about-aside">
+                    <h2>More Posts</h2>
+                    <ul class="recent-posts-list" id="more-posts">
+                        <!-- Populated by JS -->
+                    </ul>
+                </div>
+                <hr />
+
+                <div class="about-aside">
+                    <h2>Categories</h2>
+                    <div id="sidebar-cats"></div>
+                </div>
+                <hr />
+            </aside>
+
+        </div>
+    </main>
+
+    <footer>
+        <div>
+            <p>Exploring the intersection of technology and tomorrow — one deep dive at a time.</p>
+        </div>
+        <div class="copyright-part">
+            <p>&copy; Tech Tides 2026</p>
+        </div>
+    </footer>
+
+    <script src="posts.js"></script>
+    <script>
+        function proxyImg(url, width) {
+            if (!url) return '';
+            if (url.startsWith('https://wsrv.nl')) return url;
+            const w = width || 900;
+            return `https://wsrv.nl/?url=${encodeURIComponent(url)}&w=${w}&fit=cover&output=webp`;
+        }
+
+        const params = new URLSearchParams(window.location.search);
+        const postId = params.get('id');
+        const post = POSTS.find(p => p.id === postId);
+
+        function parseBody(raw) {
+            const lines = raw.split('\n');
+            let html = '';
+            let buffer = [];
+
+            function flushBuffer() {
+                const text = buffer.join(' ').trim();
+                if (text) html += `<p class="article-text">${text}</p>\n`;
+                buffer = [];
+            }
+
+            lines.forEach(line => {
+                const trimmed = line.trim();
+                if (trimmed.startsWith('## ')) {
+                    flushBuffer();
+                    html += `<h2>${trimmed.slice(3)}</h2>\n`;
+                } else if (trimmed.startsWith('IMAGE:')) {
+                    flushBuffer();
+                    const parts = trimmed.slice(6).split('|');
+                    const rawSrc = parts[0].trim();
+                    const alt = parts[1] ? parts[1].trim() : '';
+                    html += `<img src="${proxyImg(rawSrc, 900)}" alt="${alt}" style="width:100%;margin:10px 0;">\n`;
+                } else if (trimmed === '') {
+                    flushBuffer();
+                } else {
+                    buffer.push(trimmed);
+                }
+            });
+            flushBuffer();
+            return html;
+        }
+
+        function renderPost() {
+            if (!post) {
+                document.getElementById('full-post').innerHTML =
+                    '<p class="article-text">Post not found. <a href="index.html">Go back home.</a></p>';
+                return;
+            }
+
+            document.title = `Tech Tides — ${post.title}`;
+
+            const shareUrl = encodeURIComponent(window.location.href);
+            const shareTitle = encodeURIComponent(post.title);
+
+            document.getElementById('full-post').innerHTML = `
+            <div class="article-content">
+             
+                <h2>${post.title}</h2>
+                <p class="article-date">
+                    ${post.date} &nbsp;·&nbsp; <span class="article-cat-badge">${post.category}</span>
+                </p>
+                <img src="${proxyImg(post.heroImage, 900)}" alt="${post.heroAlt}" style="width:100%;margin:10px 0;">
+                ${parseBody(post.body)}
+                <div class="read-more-button" style="margin-top:20px;">
+                    <button type="button" onclick="window.location.href='index.html'">← All Posts</button>
+                </div>
+                <div class="comment-label-share" style="margin-top:16px;">
+                    <div class="comment-label"><p>Share this post:</p></div>
+                    <div class="share-article">
+                        <div class="links-icons">
+                            <a href="https://twitter.com/intent/tweet?url=${shareUrl}&text=${shareTitle}" target="_blank"><i class="fab fa-twitter"></i></a>
+                            <a href="https://www.linkedin.com/shareArticle?url=${shareUrl}" target="_blank"><i class="fab fa-linkedin"></i></a>
+                            <a href="https://www.facebook.com/sharer/sharer.php?u=${shareUrl}" target="_blank"><i class="fab fa-facebook-f"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        }
+
+        function buildMorePosts() {
+            const others = POSTS.filter(p => p.id !== postId).slice(0, 5);
+            const ul = document.getElementById('more-posts');
+            if (others.length === 0) {
+                ul.innerHTML = '<li style="color:#787878;font-size:13px;">More posts coming soon.</li>';
+                return;
+            }
+            ul.innerHTML = others.map(p =>
+                `<li><a href="post.html?id=${p.id}">${p.title}</a><span class="recent-date">${p.date}</span></li>`
+            ).join('');
+        }
+
+        function buildSidebarCats() {
+            const cats = [...new Set(POSTS.map(p => p.category))];
+            const counts = {};
+            POSTS.forEach(p => { counts[p.category] = (counts[p.category] || 0) + 1; });
+            document.getElementById('sidebar-cats').innerHTML = cats.map(c =>
+                `<a href="index.html" class="sidebar-cat-link">${c} <span class="cat-count">(${counts[c]})</span></a>`
+            ).join('');
+        }
+
+        document.getElementById('hamburger-btn').addEventListener('click', function (e) {
+            e.preventDefault();
+            document.getElementById('mobile-nav').classList.toggle('open');
+        });
+
+        
+        renderPost();
+        buildMorePosts();
+        buildSidebarCats();
+    </script>
+</body>
+
+</html>

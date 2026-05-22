@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css"
+        integrity="sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ" crossorigin="anonymous">
+    <title>Tech Tides</title>
+</head>
+
+<body>
+
+    <header>
+        <div class="header-menu-position">
+            <nav class="left-menu">
+                <a href="index.html">Home</a>
+                <a href="#categories-section">Categories</a>
+                <a href="#about-section">About</a>
+            </nav>
+            <nav class="left-menu-hamburger">
+                <a href="#" id="hamburger-btn">☰</a>
+            </nav>
+            <div class="right-menu">
+            <a href="https://www.linkedin.com/in/shishir-kumar-vallapuneni/"><i class="fab fa-linkedin"></i></a>
+            <a href="https://github.com/Shishirr11/"><i class="fab fa-github"></i></a>
+            </div>
+        </div>
+        <!-- Mobile nav dropdown -->
+        <nav class="mobile-nav" id="mobile-nav">
+            <a href="index.html">Home</a>
+            <a href="#categories-section">Categories</a>
+            <a href="#about-section">About</a>
+            <a href="#contact-section">Contact</a>
+        </nav>
+    </header>
+    <hr />
+
+    <main>
+        <div class="main-title">
+            <h1>Tech Tides</h1>
+            <h2>Surfing the wave of innovation</h2>
+        </div>
+
+        <section>
+            <div class="main-articles" id="featured-strip">
+            </div>
+        </section>
+
+        <div id="categories-section" class="category-filter">
+            <button class="cat-btn active" data-cat="all">All</button>
+        </div>
+
+        <div class="article-aside-flex">
+
+            <div class="article-column" id="article-list">
+            </div>
+
+            <aside>
+                <div class="about-aside" id="about-section">
+                    <h2>About Me</h2>
+                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&auto=format&fit=crop"
+                        alt="author photo">
+                    <p>
+                        Tech writer covering the ideas reshaping how we perceive 
+                        and build the future. Always curious, never brief.
+                    </p>
+                </div>
+                <hr />
+
+                <div class="aside-links">
+                    <h2>Follow</h2>
+                    <div>
+            <a href="https://www.linkedin.com/in/shishir-kumar-vallapuneni/"><i class="fab fa-linkedin"></i></a>
+            <a href="https://github.com/Shishirr11/"><i class="fab fa-github"></i></a>
+                    </div>
+                </div>
+                <hr />
+
+                <div class="about-aside">
+                    <h2>Recent Posts</h2>
+                    <ul class="recent-posts-list" id="recent-posts">
+                    </ul>
+                </div>
+                <hr />
+
+                <div class="aside-links" id="categories-list">
+                    <h2>Categories</h2>
+                    <div id="sidebar-cats">
+                    </div>
+                </div>
+                <hr />
+            </aside>
+
+        </div>
+    </main>
+
+    <footer id="contact-section">
+        <div>
+            <p>
+                Exploring the intersection of technology and tomorrow —
+                one deep dive at a time.
+            </p>
+        </div>
+        <div class="copyright-part">
+            <p>&copy; Tech Tides 2026</p>
+        </div>
+    </footer>
+
+    <script src="posts.js"></script>
+    <script>
+        function proxyImg(url, width) {
+            if (!url) return '';
+            if (url.startsWith('https://wsrv.nl')) return url;
+            const w = width || 900;
+            return `https://wsrv.nl/?url=${encodeURIComponent(url)}&w=${w}&fit=cover&output=webp`;
+        }
+
+        function buildFeatured() {
+            const strip = document.getElementById('featured-strip');
+            const latest = POSTS.slice(0, 4);
+            strip.innerHTML = latest.map(p => `
+            <div class="article-image-round">
+                <a href="post.html?id=${p.id}">
+                    <img src="${proxyImg(p.thumbImage, 400)}" alt="${p.thumbAlt}">
+                    <h3>${p.featuredTitle || p.title}</h3> </a>
+                </a>
+            </div>
+        `).join('');
+        }
+
+        function buildCategoryBar() {
+            const cats = ['all', ...new Set(POSTS.map(p => p.category))];
+            const bar = document.querySelector('.category-filter');
+            bar.innerHTML = cats.map(c =>
+                `<button class="cat-btn${c === 'all' ? ' active' : ''}" data-cat="${c}">${c === 'all' ? 'All' : c}</button>`
+            ).join('');
+            bar.querySelectorAll('.cat-btn').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    bar.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    buildArticleList(this.dataset.cat);
+                });
+            });
+        }
+
+        function buildArticleList(filterCat = 'all') {
+            const col = document.getElementById('article-list');
+            const filtered = filterCat === 'all' ? POSTS : POSTS.filter(p => p.category === filterCat);
+            if (filtered.length === 0) {
+                col.innerHTML = '<p class="article-text" style="padding:20px 0;">No posts in this category yet.</p>';
+                return;
+            }
+            col.innerHTML = filtered.map((p, i) => `
+            <article>
+                <div class="article-content">
+                    <h2><a href="post.html?id=${p.id}" class="article-title-link">${p.title}</a></h2>
+                    <p class="article-date">${p.date} &nbsp;·&nbsp; <span class="article-cat-badge">${p.category}</span></p>
+                    <a href="post.html?id=${p.id}">
+                        <img src="${proxyImg(p.heroImage, 900)}" alt="${p.heroAlt}" class="article-thumb">
+                    </a>
+                    <p class="article-text">${p.excerpt}</p>
+                    <div class="read-more-button">
+                        <button type="button" onclick="window.location.href='post.html?id=${p.id}'">Read more</button>
+                    </div>
+                    <div class="comment-label-share">
+                        <div class="comment-label"><p>Share:</p></div>
+                        <div class="share-article">
+                            <div class="links-icons">
+                                <a href="https://twitter.com/intent/tweet?url=${encodeURIComponent(window.location.origin + '/post.html?id=' + p.id)}&text=${encodeURIComponent(p.title)}" target="_blank"><i class="fab fa-twitter"></i></a>
+                                <a href="https://www.linkedin.com/shareArticle?url=${encodeURIComponent(window.location.origin + '/post.html?id=' + p.id)}" target="_blank"><i class="fab fa-linkedin"></i></a>
+                                <a href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.origin + '/post.html?id=' + p.id)}" target="_blank"><i class="fab fa-facebook-f"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </article>
+            ${i < filtered.length - 1 ? '<hr/>' : ''}
+        `).join('');
+        }
+
+        function buildRecentPosts() {
+            const ul = document.getElementById('recent-posts');
+            ul.innerHTML = POSTS.slice(0, 5).map(p => `
+            <li><a href="post.html?id=${p.id}">${p.title}</a><span class="recent-date">${p.date}</span></li>
+        `).join('');
+        }
+
+        function buildSidebarCats() {
+            const cats = [...new Set(POSTS.map(p => p.category))];
+            const counts = {};
+            POSTS.forEach(p => { counts[p.category] = (counts[p.category] || 0) + 1; });
+            document.getElementById('sidebar-cats').innerHTML = cats.map(c =>
+                `<a href="#" class="sidebar-cat-link" data-cat="${c}">${c} <span class="cat-count">(${counts[c]})</span></a>`
+            ).join('');
+            document.querySelectorAll('.sidebar-cat-link').forEach(a => {
+                a.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+                    const btn = document.querySelector(`.cat-btn[data-cat="${this.dataset.cat}"]`);
+                    if (btn) btn.classList.add('active');
+                    buildArticleList(this.dataset.cat);
+                    document.getElementById('article-list').scrollIntoView({ behavior: 'smooth' });
+                });
+            });
+        }
+
+        document.getElementById('hamburger-btn').addEventListener('click', function (e) {
+            e.preventDefault();
+            document.getElementById('mobile-nav').classList.toggle('open');
+        });
+
+        buildFeatured();
+        buildCategoryBar();
+        buildArticleList();
+        buildRecentPosts();
+        buildSidebarCats();
+    </script>
+</body>
+
+</html>
